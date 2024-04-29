@@ -16,32 +16,25 @@ def add_word(word, dict):
 
 
 # Defining process_line function for processing each line
-
-
 def process_line(line, dict):
     word_list = line.split()  # Get all the Words in the line
     for word in word_list:
         if word.isalnum() == True:  # Check if the word is Alpha Numeric
             word = word.lower()  # Convert all the word into lower case
         else:
-            # Remove the special chars from the word and make it lower case
-            word = "".join(ch for ch in word if ch.isalnum()).lower()
+            word = "".join(ch for ch in word if ch.isalnum()).lower() # Remove the special chars from the word and make it lower case
         add_word(word, dict)  # Add the word to dictonary
 
 
 # Defining Preety_print function for printing
-
-
 def preety_print(dict):
     print("\nThe Length of the dictonary: {}".format(len(dict)))
     print(
         "\n{:<20} {:<20} \n{:<0}".format("Word", "Count", "---------------------------")
     )
-    # Sort the dictnoary value based on the count
-    dict_sorted = sorted(dict, key=dict.get, reverse=True)
+    dict_sorted = sorted(dict, key=dict.get, reverse=True) # Sort the dictnoary value based on the count
     for word in dict_sorted:
-        # print in decending order
-        print("{:<20} {:<20}".format(word, dict[word]))
+        print("{:<20} {:<20}".format(word, dict[word])) # print in decending order
 
 
 # Defining main Function
@@ -50,7 +43,7 @@ def main():
     word_count = {}
     for line in file:
         process_line(line, word_count)
-    del_val = word_count.pop("")  # Remove the space from the Dictonary
+    del word_count[""]  # Remove the space from the Dictonary
     preety_print(word_count)
     file.close()  # Close file
 
