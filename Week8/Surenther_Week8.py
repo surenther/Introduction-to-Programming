@@ -39,12 +39,16 @@ def preety_print(dict):
 
 # Defining main Function
 def main():
-    file = open("gettysburg.txt", "r")  # Read File
-    word_count = {}
-    for line in file:
-        process_line(line, word_count)
-    del word_count[""]  # Remove the space from the Dictonary
-    preety_print(word_count)
+    try:
+        file = open("gettysburg.txt", "r")  # Read File
+    except FileNotFoundError:
+        print ('File was not found')
+    else:
+        word_count = {}
+        for line in file:
+            process_line(line, word_count)
+        del word_count[""]  # Remove the space from the Dictonary
+        preety_print(word_count)
     file.close()  # Close file
 
 
