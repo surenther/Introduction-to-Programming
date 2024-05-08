@@ -60,17 +60,21 @@ def main():
             for line in file:
                 process_line(line, word_count)
             del word_count[""]  # Remove the space from the Dictonary
-            
-            with open(file_name, "w") as filehandle: #Create file with user defined name
-                filehandle.write(
-                    "\nThe Length of the dictonary: {}\n".format(len(word_count))
-                )
-                filehandle.write(
-                    "\n{:<20} {:<20} \n{:<0}\n".format(
-                        "Word", "Count", "---------------------------"
-                        )
-                ) # Write total dictonary count to the file
-            process_file(word_count, file_name)
-            file.close()  # Close file
+        
+            file_status = os.path.isfile(os.path.join(file_location,file_name))
+            if file_status is False:          
+                with open(file_name, "w") as filehandle: #Create file with user defined name
+                    filehandle.write(
+                        "\nThe Length of the dictonary: {}\n".format(len(word_count))
+                    )
+                    filehandle.write(
+                        "\n{:<20} {:<20} \n{:<0}\n".format(
+                            "Word", "Count", "---------------------------"
+                            )
+                    ) # Write total dictonary count to the file
+                process_file(word_count, file_name)
+                file.close()  # Close file
+            else:
+                print ('File Already present')
 if __name__ == "__main__":
     main()
