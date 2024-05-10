@@ -32,8 +32,8 @@ def process_line(line, dict):
 
 
 # Defining process file function for writing into a file
-def process_file(dict, file_name,file_location):
-    with open(os.path.join(file_location,file_name), "a") as filehandle:
+def process_file(dict, file_name, file_location):
+    with open(os.path.join(file_location, file_name), "a") as filehandle:
         # Sort the dictnoary value based on the count
         dict_sorted = sorted(dict, key=dict.get, reverse=True)
         for word in dict_sorted:
@@ -44,37 +44,40 @@ def process_file(dict, file_name,file_location):
 
 # Defining main Function
 def main():
-    file_location = (os.path.dirname(__file__)) # Get current location
+    file_location = os.path.dirname(__file__)  # Get current location
     try:
-        file = open(os.path.join(file_location,'gettysburg.txt'),'r') # Read File
+        file = open(os.path.join(file_location, "gettysburg.txt"), "r")  # Read File
     except FileNotFoundError:
         print("File was not found")
     else:
-        file_name = input("Enter the file name without any extenstion: ") # get filename from user
+        # get filename from user
+        file_name = input("Enter the file name without any extenstion: ")
         if "." in file_name:
             print("Please enter the name with out .")
             sys.exit()
         else:
-            file_name = file_name + ".txt" # add .txt to the file name
+            file_name = file_name + ".txt"  # add .txt to the file name
             word_count = {}
             for line in file:
                 process_line(line, word_count)
             del word_count[""]  # Remove the space from the Dictonary
-        
-            file_status = os.path.isfile(os.path.join(file_location,file_name)) 
-            if file_status is False: # Check if the file is already in the location         
-                with open(os.path.join(file_location,file_name), "w") as filehandle: #Create file with user defined name
+
+            file_status = os.path.isfile(os.path.join(file_location, file_name))
+            if file_status is False:  # Check if the file is already in the location
+                with open(os.path.join(file_location, file_name), "w") as filehandle:
                     filehandle.write(
                         "\nThe Length of the dictonary: {}\n".format(len(word_count))
                     )
                     filehandle.write(
                         "\n{:<20} {:<20} \n{:<0}\n".format(
                             "Word", "Count", "---------------------------"
-                            )
-                    ) # Write total dictonary count to the file
-                process_file(word_count, file_name,file_location)
+                        )
+                    )  # Write total dictonary count to the file
+                process_file(word_count, file_name, file_location)
                 file.close()  # Close file
             else:
-                print ('File Already present')
+                print("File Already present")
+
+
 if __name__ == "__main__":
     main()
