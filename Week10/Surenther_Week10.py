@@ -10,6 +10,7 @@ import requests
 import json
 import time
 
+# Function for calling URL using requests
 def req_url (url,param = ''):
     try:
         if param == '':
@@ -25,6 +26,7 @@ def req_url (url,param = ''):
     else:
         return call_url.text
 
+# Function for calling list of category from chucknorris
 def call_category():
     url = "https://api.chucknorris.io/jokes/categories"
     categories = json.loads(req_url(url))
@@ -35,19 +37,21 @@ def call_category():
         cntr = cntr + 1 
     return category_dict
 
+# Function for calling joke based on the category selected from chucknorris
 def call_joke(param):
     url = "https://api.chucknorris.io/jokes/random"
     joke = json.loads(req_url(url,param))
     return joke
-    
+
+# Function for display
 def preety_print(dict):
     print ("\n Category Selected: {} \n \n Joke: {} \n".format("" .join(dict ['categories']),dict['value']))
 
 def main():
-    category_dict = call_category ()
+    category_dict = call_category () #Dictonary with list of categories
     keep_going = True
     while keep_going:
-        time.sleep (2)
+        time.sleep (2) #delay to show the joke
         category = input ("Category Selections:\n" + "\n".join("Type '{}' for {}".format(key, value) for key, value in category_dict.items()) + "\n\nType 'X' to Exit" + "\n \n")
         if category.lower () == 'x':
             print ('\n Good Bye \n')
