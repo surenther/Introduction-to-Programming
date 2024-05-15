@@ -11,8 +11,6 @@ import json
 import time
 
 # Function for calling URL using requests
-
-
 def req_url(url, param=""):
     try:
         if param == "":
@@ -30,8 +28,6 @@ def req_url(url, param=""):
 
 
 # Function for calling list of category from chucknorris
-
-
 def call_category():
     url = "https://api.chucknorris.io/jokes/categories"
     categories = json.loads(req_url(url))
@@ -44,8 +40,6 @@ def call_category():
 
 
 # Function for calling joke based on the category selected from chucknorris
-
-
 def call_joke(param):
     url = "https://api.chucknorris.io/jokes/random"
     joke = json.loads(req_url(url, param))
@@ -53,8 +47,6 @@ def call_joke(param):
 
 
 # Function for display
-
-
 def preety_print(dict):
     print(
         "\n Category Selected: {} \n \n Joke: {} \n".format(
