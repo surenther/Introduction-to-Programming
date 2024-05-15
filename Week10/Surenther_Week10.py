@@ -8,33 +8,63 @@
 
 import requests
 import json
-import sys
+import time
 
-def main():
-    
-    call_category = requests.get("https://api.chucknorris.io/jokes/categories")
-    categories = json.loads(call_category.text)
+def req_url (url,param = ''):
+    try:
+        if param == '':
+            call_url = requests.get(url)
+        else:
+            call_url = requests.get(url,params=param)
+    except requests.exceptions.ReadTimeout:
+        raise SystemExit ('Timeout.Not able to Reach URL')
+    except requests.exceptions.ConnectionError:
+        raise SystemExit ('Connection Error. Not able to Reach URL')
+    except requests.exceptions.RequestException:
+        raise SystemExit ('Unknown error occured')
+    else:
+        return call_url.text
+
+def call_category():
+    url = "https://api.chucknorris.io/jokes/categories"
+    categories = json.loads(req_url(url))
     cntr = 1
     category_dict = {}
     for value in categories:
         category_dict [cntr] = value
-        cntr = cntr + 1
-                
-    category = int (input ("Category Selections:\n" + "\n".join("Type '{}' for {}".format(k, v) for k, v in category_dict.items()) + "\n \n"))
-    category_value = category_dict.get(category)
-    if category_value :
-        param = {'category':category_dict [category]}
-    else:
-        print ('Please Select right Category')
-        sys.exit()
-    
-    call_joke = requests.get("https://api.chucknorris.io/jokes/random",params=param)
-    
-    joke = json.loads(call_joke.text)
-    print ("\n Category Selected: {} \n \n Joke: {} \n".format("" .join(joke ['categories']),joke['value']))
- 
+        cntr = cntr + 1 
+    return category_dict
 
+def call_joke(param):
+    url = "https://api.chucknorris.io/jokes/random"
+    joke = json.loads(req_url(url,param))
+    return joke
+    
+def preety_print(dict):
+    print ("\n Category Selected: {} \n \n Joke: {} \n".format("" .join(dict ['categories']),dict['value']))
 
+def main():
+    category_dict = call_category ()
+    keep_going = True
+    while keep_going:
+        time.sleep (2)
+        category = input ("Category Selections:\n" + "\n".join("Type '{}' for {}".format(key, value) for key, value in category_dict.items()) + "\n\nType 'X' to Exit" + "\n \n")
+        if category.lower () == 'x':
+            print ('\n Good Bye \n')
+            keep_going = False
+        else:
+            try:
+                category = int (category)
+            except ValueError:
+                print ("Sorry, that is not an integer . Try again.")
+            else:
+                category_value = category_dict.get(category)
+                if category_value :
+                    param = {'category':category_dict [category]}
+                    preety_print (call_joke (param))
+                else:
+                    print ('Please Select right Category')
+     
 
 if __name__ == "__main__":
     main()
