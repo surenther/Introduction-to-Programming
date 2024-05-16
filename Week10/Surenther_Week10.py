@@ -58,11 +58,11 @@ def preety_print(dict):
 def main():
     category_dict = call_category()  # Dictonary with list of categories
     keep_going = True
+    print ("Welcome.Please select from the following Category")
     while keep_going:
         time.sleep(2)  # delay to show the joke
         category = input(
-            "Category Selections:\n"
-            + "\n".join(
+            "\n".join(
                 "Type '{}' for {}".format(key, value)
                 for key, value in category_dict.items()
             )
