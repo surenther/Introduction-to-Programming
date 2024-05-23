@@ -29,9 +29,12 @@ def main():
     while keep_going:
         price = input("Please Enter the price for the item. Press 'q' to quit:  ")
         if price.lower() == "q":
-            print("\nTotal items in the cart: {} \nTotal price of the items: {}".format(cashregister.getcount(),locale.currency(cashregister.gettotal(),grouping=True)))
-            print("\nThanks for Shopping with us")
-            keep_going = False 
+            if (cashregister.getcount() == 0):
+                print("No items in the cart. Please add some items")
+            else:
+                print("\nTotal items in the cart: {} \nTotal price of the items: {}".format(cashregister.getcount(),locale.currency(cashregister.gettotal(),grouping=True)))
+                print("\nThanks for Shopping with us")
+                keep_going = False 
         else:
             try:
                 price = float(price)
