@@ -9,19 +9,19 @@
 import locale
 
 
-class cashregister:
-    num_of_item = 0
-    total_price = 0
+class CashRegister:
+    num_of_item = 0  #Class variable for counting no of items
+    total_price = 0  #Class variable for calculating total price of all items
 
-    def additem(self, price):
-        cashregister.num_of_item += 1
-        cashregister.total_price += price
+    def additem(self, price):  #Method for adding items
+        CashRegister.num_of_item += 1
+        CashRegister.total_price += price
 
-    def gettotal():
-        return cashregister.total_price
+    def gettotal(): #Method for retrieving total price
+        return CashRegister.total_price
 
-    def getcount():
-        return cashregister.num_of_item
+    def getcount(): #Method for retrieving count of items
+        return CashRegister.num_of_item
 
 
 def main():
@@ -29,15 +29,15 @@ def main():
     keep_going = True
     print("Welcome")
     while keep_going:
-        price = input("Please Enter the price for the item. Press 'q' to quit:  ")
+        price = input("Please Enter the price for the item. Press 'q' to quit:  ") #Get the price from the user
         if price.lower() == "q":
-            if cashregister.getcount() == 0:
+            if CashRegister.getcount() == 0: #Asking user to add items before quiting
                 print("No items in the cart. Please add some items")
             else:
                 print(
                     "\nTotal items in the cart: {} \nTotal price of the items: {}".format(
-                        cashregister.getcount(),
-                        locale.currency(cashregister.gettotal(), grouping=True),
+                        CashRegister.getcount(),
+                        locale.currency(CashRegister.gettotal(), grouping=True),
                     )
                 )
                 print("\nThanks for Shopping with us")
@@ -49,7 +49,7 @@ def main():
                 print("Sorry, that is not a number . Try again.")
             else:
                 if price > 0:
-                    item = cashregister()
+                    item = CashRegister()
                     item.additem(price)
                 else:
                     print("The Price must be greater than 0")

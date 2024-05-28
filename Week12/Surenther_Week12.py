@@ -26,20 +26,34 @@ def req_url(url):
         return call_url.text, call_url.status_code
 
 # Function for returning error based on Status
-def error_code(status):
+def requests_code(status):
     if status == 400:
         print ("Error 400 - Bad Request")
     elif status == 401:
         print ("Error 401 - Unauthorized")
     elif status == 404:
-        print ("Error 404 - Not Found")
+        print ("Error 404 - No Data Found")
     elif status == 429:
         print ("Error 429 - Quota exceeded")
     else:
         print ("Unexpected error")
 
-# Function for identifying Lattitude and longtitude
-def latitude (city):
+# Function for input exception handling
+def input_err(value):
+    if value.lower() == "x":
+        print("\n Good Bye \n")
+        return 'error'
+    else:        
+        try:
+            value_key = int(value)
+        except ValueError:
+            print("Sorry, that is not an integer . Try again.")
+            return 'error'
+        else:
+            return value_key
+        
+# Function for identifying Lattitude and longtitude based on City
+def city_search (city):
     url = "http://api.openweathermap.org/geo/1.0/direct?q="+city+"&limit=5"+"&appid="+app_id
     lat = json.loads(req_url(url)[0])
     status = req_url(url)[1]
@@ -47,30 +61,87 @@ def latitude (city):
     if status == 200 :
         if (len(lat)) > 0:
             for key, value in enumerate(lat):
-                city = "Type '{}' for {} in {},{}".format(key,value['name'],value['state'],value['country'])
+                if 'state' not in value:
+                    city = "Type '{}' for {} ,{}".format(key,value['name'],value['country'])
+                else:
+                    city = "Type '{}' for {} in {},{}".format(key,value['name'],value['state'],value['country'])
                 city_merge = city_merge + "\n" + city
-    else:
-        error_code(status)
-        sys.exit()
-    city = input ("".join(city_merge + "\n\nType 'X' to Exit" + "\n \n"))
-    if city.lower() == "x":
-        print("\n Good Bye \n")
-    else:        
-        try:
-            city_key = int(city)
-        except ValueError:
-            print("Sorry, that is not an integer . Try again.")
+            city = input ("".join(city_merge + "\n\nType 'X' to Exit" + "\n \n"))
+            city_key = input_err (city)
+            if city_key != 'error':
+                if city_key >= len(lat) :
+                    print("Please Select right City")
+                else:
+                    return lat[city_key]['lat'] , lat[city_key] ['lon']
         else:
-            if city_key  >= len(lat) :
-                print("Please Select right City")
-            else:
-                return lat[city_key]['lat'] , lat[city_key] ['lon'] , lat[city_key]
-
-
-def main ():
-    Option = input ('please enter city name:')
-    print (latitude(Option))
-
+            print ("\nNo Data Found ")
+    else:
+        requests_code(status)
+        sys.exit()
         
+# Function for identifying Lattitude and longtitude based on ZIP
+def zip_search (zip,country):
+    url = "http://api.openweathermap.org/geo/1.0/zip?zip="+zip+","+country+"&appid="+app_id
+    lat = json.loads(req_url(url)[0])
+    status = req_url(url)[1]
+    if status == 200 :
+            return lat['lat'] , lat['lon']
+    else:
+        requests_code(status)
+        sys.exit()    
+
+# Function for finding Weather based on Lattitude and longtitude
+def weather(lat,long):
+    unit = input("\nType 1 for Fahrenheit\nType 2 for Celsius\nType 3 for Kelvin\n\n")
+    unit_val = input_err(unit)
+    if unit_val != 'error':
+        match unit_val:
+            case 1:
+                unit='imperial'
+                unit_name = 'Fahrenheit'
+            case 2:
+                unit='metric'
+                unit_name = 'Celsius'
+            case 3:
+                unit='standard'
+                unit_name = 'Kelvin'
+            case _:
+                unit='imperial'
+                unit_name = 'Fahrenheit'
+    url = "https://api.openweathermap.org/data/2.5/weather?lat="+str(lat)+"&lon="+str(long)+"&appid="+app_id+"&units="+unit
+    weather = json.loads(req_url(url)[0])
+    status = req_url(url)[1]
+    if status == 200 :
+        preety_print (weather,unit_name)
+    else:
+        requests_code(status)
+        sys.exit()    
+
+# Function for displaying Weather information
+def preety_print(climate,unit):
+    print ("\nWeather Details in {}\n------------------------------\nCity: {}\nCountry: {}\nCurrent Temp: {}\N{DEGREE SIGN}F\nFeels Like: {}\nMin Temp: {}\nMax Temp: {}\nHumidity: {}\nPressure: {}\nDescription: {}".format(unit,climate['name'],climate['sys']['country'],climate['main']['temp'],climate['main']['feels_like'],climate['main']['temp_min'],climate['main']['temp_max'],climate['main']['humidity'],climate['main']['pressure'],climate['weather'][0]['description']))
+    
+def main ():
+    option = input ("\nType 1 for Search based on City name\nType 2 for Search based on ZIP\nType 'X' to Exit\n\n")
+    option_val = input_err(option)
+    if option_val != 'error':
+        if option_val == 1:
+            city = input ("Type the City name: ")
+            city_lat = city_search(city)
+            if city_lat is None :
+                print ('')
+            else:
+                lat,long = city_lat
+                weather (lat,long)
+                
+        elif option_val == 2:
+            zip = input ("Type the Zip code: ")
+            country_code = input ("Type the two digit country code: ")
+            lat,long = zip_search(zip,country_code)
+            weather (lat,long)
+            
+        else:
+            print ('Please select the right option')
+
 if __name__ == "__main__":
     main()
