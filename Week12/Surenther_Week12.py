@@ -92,34 +92,35 @@ def zip_search (zip,country):
 
 # Function for finding Weather based on Lattitude and longtitude
 def weather(lat,long):
-    unit = input("\nType 1 for Fahrenheit\nType 2 for Celsius\nType 3 for Kelvin\n\n")
+    unit = input("\nType '1' for Fahrenheit\nType '2' for Celsius\nType any number for Kelvin\n\n")
     unit_val = input_err(unit)
     if unit_val != 'error':
         match unit_val:
             case 1:
                 unit='imperial'
                 unit_name = 'Fahrenheit'
+                symb= u'\N{DEGREE SIGN}'+'F'
             case 2:
                 unit='metric'
                 unit_name = 'Celsius'
-            case 3:
+                symb= u'\N{DEGREE SIGN}'+'C'
+            case _:
                 unit='standard'
                 unit_name = 'Kelvin'
-            case _:
-                unit='imperial'
-                unit_name = 'Fahrenheit'
-    url = "https://api.openweathermap.org/data/2.5/weather?lat="+str(lat)+"&lon="+str(long)+"&appid="+app_id+"&units="+unit
-    weather = json.loads(req_url(url)[0])
-    status = req_url(url)[1]
-    if status == 200 :
-        preety_print (weather,unit_name)
-    else:
-        requests_code(status)
-        sys.exit()    
+                symb= ''
+                        
+        url = "https://api.openweathermap.org/data/2.5/weather?lat="+str(lat)+"&lon="+str(long)+"&appid="+app_id+"&units="+unit
+        weather = json.loads(req_url(url)[0])
+        status = req_url(url)[1]
+        if status == 200 :
+            preety_print (weather,unit_name,symb)
+        else:
+            requests_code(status)
+            sys.exit()    
 
 # Function for displaying Weather information
-def preety_print(climate,unit):
-    print ("\nWeather Details in {}\n------------------------------\nCity: {}\nCountry: {}\nCurrent Temp: {}\N{DEGREE SIGN}F\nFeels Like: {}\nMin Temp: {}\nMax Temp: {}\nHumidity: {}\nPressure: {}\nDescription: {}".format(unit,climate['name'],climate['sys']['country'],climate['main']['temp'],climate['main']['feels_like'],climate['main']['temp_min'],climate['main']['temp_max'],climate['main']['humidity'],climate['main']['pressure'],climate['weather'][0]['description']))
+def preety_print(climate,unit_name,symb):
+    print ("\nWeather Details in {}\n------------------------------\nCity: {}\nCountry: {}\nCurrent Temp: {}{}\nFeels Like: {}{}\nMin Temp: {}{}\nMax Temp: {}{}\nHumidity: {}\nPressure: {}\nDescription: {}".format(unit_name,climate['name'],climate['sys']['country'],climate['main']['temp'],symb,climate['main']['feels_like'],symb,climate['main']['temp_min'],symb,climate['main']['temp_max'],symb,climate['main']['humidity'],climate['main']['pressure'],climate['weather'][0]['description'].title()))
     
 def main ():
     option = input ("\nType 1 for Search based on City name\nType 2 for Search based on ZIP\nType 'X' to Exit\n\n")
