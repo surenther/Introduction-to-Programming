@@ -87,7 +87,10 @@ def city_search(city):
                     print("Please Select right City")
                 else:
                     # Return Latitude and Longitude
-                    return lat[city_key]["lat"], lat[city_key]["lon"]
+                    if "state" not in lat[city_key]:
+                        return lat[city_key]["lat"], lat[city_key]["lon"], lat[city_key]["name"], lat[city_key]["country"] , "--"
+                    else:
+                        return lat[city_key]["lat"], lat[city_key]["lon"], lat[city_key]["name"], lat[city_key]["country"] , lat[city_key]["state"]                        
         else:
             print("\nNo Data Found ")
     else:
@@ -108,14 +111,17 @@ def zip_search(zip, country):
     lat = json.loads(req_url(url)[0])
     status = req_url(url)[1]
     if status == 200:
-        return lat["lat"], lat["lon"]  # Return Latitude and Longitude
+        return lat["lat"], lat["lon"],lat["name"], lat["country"], "--" # Return Latitude and Longitude
+    elif status == 404:
+        requests_code(status)
+        return 'No Data'      
     else:
         requests_code(status)
         sys.exit()  # Stop execution if there was an status error.
 
 
 # Function for identifying Weather based on Latitude and Longitude
-def weather(lat, long):
+def weather(lat, long, name, country,state):
     # Ask user to select the Unit type
     unit = input(
         "\nType '1' for Fahrenheit\nType '2' for Celsius\nType any number for Kelvin\n\n"
@@ -150,18 +156,19 @@ def weather(lat, long):
         status = req_url(url)[1]
         if status == 200:
             # Display weather information
-            preety_print(weather, unit_name, symb)
+            preety_print(weather, unit_name, symb, name, country,state)
         else:
             requests_code(status)
             sys.exit()  # Stop execution if there was an status error.
 
 
 # Function for displaying Weather information
-def preety_print(climate, unit_name, symb):
+def preety_print(climate, unit_name, symb, name, country,state):
     print(
-        "\nWeather Details\n----------------\nCity: {}\nCountry: {}\nCurrent Temp: {}{}\nFeels Like: {}{}\nMin Temp: {}{}\nMax Temp: {}{}\nHumidity: {}\nPressure: {}\nDescription: {}".format(
-            climate["name"],
-            climate["sys"]["country"],
+        "\nWeather Details\n----------------\nCity: {}\nState: {}\nCountry: {}\nCurrent Temp: {}{}\nFeels Like: {}{}\nMin Temp: {}{}\nMax Temp: {}{}\nHumidity: {}\nPressure: {}\nDescription: {}".format(
+            name,
+            state,            
+            country,
             climate["main"]["temp"],
             symb,
             climate["main"]["feels_like"],
@@ -193,19 +200,21 @@ def main():
                 if city_lat is None:
                     print("")
                 else:
-                    lat, long = city_lat
-                    weather(lat, long)
+                    lat, long , name, country, state = city_lat
+                    weather(lat, long, name, country,state)
 
             elif option_val == 2:
                 zip = input("Type the Zip code: ")
                 country_code = input("Type the two digit country code: ")
-                # Calling zip search function by passing user typed zip value
-                lat, long = zip_search(zip, country_code)
-                weather(lat, long)
+                if zip_search(zip, country_code) == 'No Data':
+                    print (" ")
+                else:
+                    # Calling zip search function by passing user typed zip value
+                    lat, long, name, country, state = zip_search(zip, country_code)
+                    weather(lat, long, name, country,state)
 
             else:
                 print("Please select the right option")
-                keep_going = False
 
 
 if __name__ == "__main__":
