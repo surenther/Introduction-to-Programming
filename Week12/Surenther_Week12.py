@@ -9,6 +9,7 @@
 import requests
 import json
 import sys
+import re
 
 app_id = "1b93174e0a0a4f0c8cc7032582e21b6b"
 
@@ -37,22 +38,39 @@ def requests_code(status):
     elif status == 429:
         print("Error 429 - Quota exceeded")
     else:
-        print("Unexpected error")
+        print("Unknown error occured")
 
 
 # Function for input exception handling
-def input_validation(value):
-    if value.lower() == "x":
-        print("\n Good Bye \n")
-        sys.exit()  # Stop Execution if the user type x
-    else:
-        try:
-            value_key = int(value)
-        except ValueError:
-            print("Sorry, that is not an integer . Try again.")
+def input_validation(value,sys_exit=""):
+    if sys_exit == "city" and bool(re.search(r'\d', value)):
+        print ("Please enter only letters, not numbers.")
+        return "error"
+    elif sys_exit == "zip" and len (value) != 5:
+        print("Please enter Five Digit Number.")
+        return "error"         
+    elif value.lower() == "x":
+        if sys_exit == "":
+            print("\nThank you for using our application. Have a great day!\n")
+            sys.exit()  # Stop Execution if the user type x       
+        elif sys_exit == "temp" or sys_exit =="zip":
+            print("Please enter a number instead of characters.")
             return "error"
+        elif sys_exit =="city":
+            return value
         else:
-            return value_key
+            return "error"
+    else:
+        if sys_exit == "city":
+            return value
+        else:
+            try:
+                value_key = int(value)
+            except ValueError:
+                print("Please enter a number instead of characters.")
+                return "error"
+            else:
+                return value_key
 
 
 # Function for identifying Latitude and Longitude based on City Name
@@ -60,6 +78,7 @@ def city_search(city):
     url = (
         "http://api.openweathermap.org/geo/1.0/direct?q="
         + city
+        + ",US"
         + "&limit=5"
         + "&appid="
         + app_id
@@ -72,48 +91,46 @@ def city_search(city):
             # Ask user to select the city based on the input value
             for key, value in enumerate(lat):
                 if "state" not in value:
-                    city = "Type '{}' for {} ,{}".format(
+                    city = "Type '{}' for {},{}".format(
                         key, value["name"], value["country"]
                     )
                 else:
-                    city = "Type '{}' for {} in {},{}".format(
+                    city = "Type '{}' for {},{},{}".format(
                         key, value["name"], value["state"], value["country"]
                     )
                 city_merge = city_merge + "\n" + city
-            city = input("".join(city_merge + "\n\nType 'X' to Exit" + "\n \n"))
-            city_key = input_validation(city)
+            city = input("".join("\nPlease select your city: \n"+city_merge + "\nType 'X' to Exit" + "\n \n"))
+            city_key = input_validation(city,"city_search")
             if city_key != "error":
                 if city_key >= len(lat):
-                    print("Please Select right City")
+                    print("Please select the correct option.")
                 else:
                     # Return Latitude and Longitude
-                    if "state" not in lat[city_key]:
-                        return lat[city_key]["lat"], lat[city_key]["lon"], lat[city_key]["name"], lat[city_key]["country"] , "--"
-                    else:
-                        return lat[city_key]["lat"], lat[city_key]["lon"], lat[city_key]["name"], lat[city_key]["country"] , lat[city_key]["state"]                        
+                    return lat[city_key]["lat"], lat[city_key]["lon"]
         else:
-            print("\nNo Data Found ")
+            print("\nApologies, no data was found for the search term '"+city+"'")
     else:
         requests_code(status)
         sys.exit()  # Stop execution if there was an status error.
 
 
 # Function for identifying Latitude and Longitude based on Zip
-def zip_search(zip, country):
+def zip_search(zip):
+    zip = str(zip)
     url = (
         "http://api.openweathermap.org/geo/1.0/zip?zip="
         + zip
         + ","
-        + country
+        + "US"
         + "&appid="
         + app_id
     )
     lat = json.loads(req_url(url)[0])
     status = req_url(url)[1]
     if status == 200:
-        return lat["lat"], lat["lon"],lat["name"], lat["country"], "--" # Return Latitude and Longitude
+        return lat["lat"], lat["lon"] # Return Latitude and Longitude
     elif status == 404:
-        requests_code(status)
+        print("\nApologies, no data was found for the search term '"+zip+"'")
         return 'No Data'      
     else:
         requests_code(status)
@@ -121,25 +138,22 @@ def zip_search(zip, country):
 
 
 # Function for identifying Weather based on Latitude and Longitude
-def weather(lat, long, name, country,state):
+def weather(lat, long):
     # Ask user to select the Unit type
     unit = input(
-        "\nType '1' for Fahrenheit\nType '2' for Celsius\nType any number for Kelvin\n\n"
+        "\nPlease select your preferred temperature unit:\nType '1' for Fahrenheit\nType '2' for Celsius\nType any number for Kelvin\n\n"
     )
-    unit_val = input_validation(unit)
+    unit_val = input_validation(unit,"temp")
     if unit_val != "error":
         match unit_val:
             case 1:
                 unit = "imperial"
-                unit_name = "Fahrenheit"
                 symb = "\N{DEGREE SIGN}" + "F"  # Fahrenheit Symbol
             case 2:
                 unit = "metric"
-                unit_name = "Celsius"
                 symb = "\N{DEGREE SIGN}" + "C"  # Celsius Symbol
             case _:
                 unit = "standard"
-                unit_name = "Kelvin"
                 symb = ""
 
         url = (
@@ -156,19 +170,17 @@ def weather(lat, long, name, country,state):
         status = req_url(url)[1]
         if status == 200:
             # Display weather information
-            preety_print(weather, unit_name, symb, name, country,state)
+            preety_print(weather, symb)
         else:
             requests_code(status)
             sys.exit()  # Stop execution if there was an status error.
 
 
 # Function for displaying Weather information
-def preety_print(climate, unit_name, symb, name, country,state):
+def preety_print(climate, symb):
     print(
-        "\nWeather Details\n----------------\nCity: {}\nState: {}\nCountry: {}\nCurrent Temp: {}{}\nFeels Like: {}{}\nMin Temp: {}{}\nMax Temp: {}{}\nHumidity: {}\nPressure: {}\nDescription: {}".format(
-            name,
-            state,            
-            country,
+        "\nWeather Details\n----------------\nCity: {}\nCurrent Temp: {}{}\nFeels Like: {}{}\nMin Temp: {}{}\nMax Temp: {}{}\nHumidity: {}%\nPressure: {} hPa\nDescription: {}".format(
+            climate["name"],
             climate["main"]["temp"],
             symb,
             climate["main"]["feels_like"],
@@ -186,35 +198,39 @@ def preety_print(climate, unit_name, symb, name, country,state):
 
 def main():
     keep_going = True
+    print ("\nWelcome to the Weather app. This application allows you to retrieve weather details for any location within the USA.")
     while keep_going:
         # Ask User to select the Search type
         option = input(
-            "\nType 1 for Search based on City name\nType 2 for Search based on ZIP\nType 'X' to Exit\n\n"
+            "\nPlease select an option:\n1 - Search by City name in the USA\n2 - Search by ZIP code in the USA\nX - Exit\n\n"
         )
         option_val = input_validation(option)
         if option_val != "error":
             if option_val == 1:
-                city = input("Type the City name: ")
-                # Calling city search function by passing user typed city value
-                city_lat = city_search(city)
-                if city_lat is None:
-                    print("")
-                else:
-                    lat, long , name, country, state = city_lat
-                    weather(lat, long, name, country,state)
+                city = input("Please enter the City name: ")
+                city_val = input_validation (city,"city")
+                if city_val != "error":
+                    # Calling city search function by passing user typed city value
+                    city_lat = city_search(city_val)
+                    if city_lat is None:
+                        print("")
+                    else:
+                        lat, long = city_lat
+                        weather(lat, long)
 
             elif option_val == 2:
-                zip = input("Type the Zip code: ")
-                country_code = input("Type the two digit country code: ")
-                if zip_search(zip, country_code) == 'No Data':
-                    print (" ")
-                else:
-                    # Calling zip search function by passing user typed zip value
-                    lat, long, name, country, state = zip_search(zip, country_code)
-                    weather(lat, long, name, country,state)
+                zip = input("Please enter the ZIP code: ")
+                zip_val = input_validation (zip,"zip")
+                if zip_val != "error":
+                    if zip_search(zip_val) == 'No Data':
+                        print (" ")
+                    else:
+                        # Calling zip search function by passing user typed zip value
+                        lat, long = zip_search(zip)
+                        weather(lat, long)
 
             else:
-                print("Please select the right option")
+                print("Please select the correct option.")
 
 
 if __name__ == "__main__":
